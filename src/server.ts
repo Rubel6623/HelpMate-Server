@@ -17,7 +17,7 @@ async function main() {
 
 main();
 
-// Handle unhandled promise rejections//Setup the Projects with apollo CLI
+// Handle unhandled promise rejections//
 process.on('unhandledRejection', async (err) => {
   console.log(`😈 Unhandled Rejection detected, shutting down...`);
   console.error(err);
