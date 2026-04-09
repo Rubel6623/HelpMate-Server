@@ -7,21 +7,25 @@ let server: Server;
 
 async function main() {
   try {
+    await prisma.$connect();
+    console.log('✅ Database connected successfully');
+
     server = app.listen(config.port, () => {
       console.log(`🚀 HelpMate app listening on port ${config.port}`);
     });
   } catch (err) {
-    console.error('Failed to start server:', err);
+    console.error('❌ Failed to start server:', err);
+    process.exit(1);
   }
 }
 
 main();
 
-// Handle unhandled promise rejections//
+// Handle unhandled promise rejections
 process.on('unhandledRejection', async (err) => {
   console.log(`😈 Unhandled Rejection detected, shutting down...`);
   console.error(err);
-  
+
   if (server) {
     server.close(async () => {
       await prisma.$disconnect();
@@ -42,24 +46,30 @@ process.on('uncaughtException', async (err) => {
 });
 
 // Handle termination signals for graceful shutdown
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
   console.log('👋 SIGTERM received. Shutting down gracefully...');
   if (server) {
     server.close(async () => {
-      await prisma.$disconnect();
       console.log('🛑 Process terminated!');
+      await prisma.$disconnect();
       process.exit(0);
     });
+  } else {
+    await prisma.$disconnect();
+    process.exit(0);
   }
 });
 
-process.on('SIGINT', () => {
+process.on('SIGINT', async () => {
   console.log('👋 SIGINT received. Shutting down gracefully...');
   if (server) {
     server.close(async () => {
-      await prisma.$disconnect();
       console.log('🛑 Process terminated!');
+      await prisma.$disconnect();
       process.exit(0);
     });
+  } else {
+    await prisma.$disconnect();
+    process.exit(0);
   }
 });

@@ -3,16 +3,451 @@ generator client {
   output   = "../generated/prisma"
 }
 
-// provider = "prisma-client-js"
-
 datasource db {
   provider = "postgresql"
 }
 
+
+enum UserRole {
+  USER   
+  RUNNER 
+  ADMIN
+  SUPERADMIN
+}
+
+enum VerificationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  REJECTED
+  SUSPENDED
+}
+
+enum TaskStatus {
+  OPEN        
+  ASSIGNED    
+  IN_PROGRESS 
+  COMPLETED   
+  CONFIRMED   
+  CANCELLED
+  DISPUTED    
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum PaymentStatus {
+  PENDING
+  ESCROWED   
+  RELEASED   
+  REFUNDED   
+  FAILED
+}
+
+enum TransactionType {
+  CREDIT
+  DEBIT
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum TransactionReason {
+  TOP_UP          
+  TASK_PAYMENT    
+  TASK_PAYOUT     
+  REFUND          
+  PLATFORM_FEE    
+  INSTANT_PAYOUT  
+  WITHDRAWAL      
+}
+
+enum NotificationType {
+  TASK_POSTED
+  APPLICATION_RECEIVED
+  APPLICATION_ACCEPTED
+  APPLICATION_REJECTED
+  TASK_ASSIGNED
+  RUNNER_EN_ROUTE
+  RUNNER_ARRIVED
+  TASK_COMPLETED
+  TASK_CONFIRMED
+  TASK_CANCELLED
+  TASK_DISPUTED
+  PAYMENT_RECEIVED
+  PAYMENT_SENT
+  REVIEW_RECEIVED
+  SOS_ALERT
+  SYSTEM
+}
+
+enum DisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED_USER_FAVOUR
+  RESOLVED_RUNNER_FAVOUR
+  RESOLVED_PARTIAL
+  CLOSED
+}
+
+enum BadgeType {
+  TASK_MILESTONE
+  FIVE_STAR_STREAK
+  PUNCTUALITY
+  TOP_RUNNER
+}
+
+
 model User {
-    id        String   @id @default(uuid())
-    email     String   @unique
-    name      String?
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  id                 String             @id @default(uuid())
+  name               String
+  email              String?            @unique
+  phone              String             @unique
+  passwordHash       String
+  role               UserRole           @default(USER)
+  avatarUrl          String?
+  address            String?
+  isActive           Boolean            @default(true)
+  verificationStatus VerificationStatus @default(UNVERIFIED)
+  hasTrustBadge      Boolean            @default(false) // Unlocked by optional NID for Users
+  emergencyContactName  String?
+  emergencyContactPhone String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  // Relations
+  runnerProfile    RunnerProfile?
+  wallet           Wallet?
+  tasksPosted      Task[]             @relation("UserTasks")
+  applications     TaskApplication[]  @relation("RunnerApplications")
+  assignments      Assignment[]       @relation("RunnerAssignments")
+  reviewsGiven     Review[]           @relation("Reviewer")
+  reviewsReceived  Review[]           @relation("Reviewee")
+  notifications    Notification[]
+  disputes         Dispute[]          @relation("DisputeRaisedBy")
+  badges           UserBadge[]
+  sosAlerts        SosAlert[]
+
+  @@map("users")
+}
+
+
+model RunnerProfile {
+  id                 String   @id @default(uuid())
+  university         String
+  studentId          String   @unique
+  nationalId         String?  @unique
+  averageRating      Float    @default(0.0)
+  totalTasksDone     Int      @default(0)
+  acceptanceRate     Float    @default(0.0) 
+  isVerified         Boolean  @default(false)
+  verifiedAt         DateTime?
+  bio                String?
+  isOnline           Boolean @default(false) 
+  preferredRadius    Float   @default(5.0)   
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  // Foreign key
+  userId String @unique
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("runner_profiles")
+}
+
+
+model Category {
+  id              String  @id @default(uuid())
+  name            String  @unique
+  icon            String?
+  avgDurationMin  Int?    
+  isActive        Boolean @default(true)
+
+  tasks Task[]
+
+  @@map("categories")
+}
+
+
+model Task {
+  id                String      @id @default(uuid())
+  title             String
+  description       String
+  offerPrice        Decimal     @db.Decimal(10, 2)
+  platformFee       Decimal     @default(0.00) @db.Decimal(10, 2) // Calculated at payment
+  status            TaskStatus  @default(OPEN)
+  timeWindowStart   DateTime
+  timeWindowEnd     DateTime
+  estimatedDuration Int         // minutes
+  radiusKm          Float       @default(5.0)
+
+  stops             TaskStop[] // Relation for multiple stops
+  // Optional extras
+  specialNotes      String?
+  attachmentUrls    String[]    // Photo/file URLs
+  isPromoted        Boolean     @default(false)
+  promotionFee      Decimal?    @db.Decimal(10, 2)
+
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  // Foreign keys
+  userId     String
+  categoryId String
+
+  // Relations
+  user         User              @relation("UserTasks", fields: [userId], references: [id], onDelete: Cascade)
+  category     Category          @relation(fields: [categoryId], references: [id])
+  applications TaskApplication[]
+  assignment   Assignment?
+  payment      TaskPayment?
+  reviews      Review[]
+  dispute      Dispute?
+  statusLogs   TaskStatusLog[]
+  sosAlerts    SosAlert[]
+
+  @@map("tasks")
+}
+
+model TaskStop {
+  id            String  @id @default(uuid())
+  order         Int     // 1, 2, 3 for sequence
+  locationLabel String
+  locationLat   Float
+  locationLng   Float
+  address       String? // Full address (masked in API until assigned)
+  isCompleted   Boolean @default(false)
+  
+  taskId        String
+  task          Task    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@map("task_stops")
+}
+
+model TaskStatusLog {
+  id        String     @id @default(uuid())
+  status    TaskStatus
+  note      String?
+  createdAt DateTime   @default(now())
+
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@map("task_status_logs")
+}
+
+
+model TaskApplication {
+  id        String            @id @default(uuid())
+  bidAmount Decimal?          @db.Decimal(10, 2) // Phase 2 competing bids
+  message   String?           // Optional pitch from runner
+  status    ApplicationStatus @default(PENDING)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  // Foreign keys
+  taskId   String
+  runnerId String
+
+  // Relations
+  task       Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  runner     User       @relation("RunnerApplications", fields: [runnerId], references: [id], onDelete: Cascade)
+  assignment Assignment?
+
+  @@unique([taskId, runnerId])
+  @@map("task_applications")
+}
+
+
+model Assignment {
+  id           String    @id @default(uuid())
+  acceptedAt   DateTime  @default(now())
+  startedAt    DateTime?
+  completedAt  DateTime? // Runner marks done
+  confirmedAt  DateTime? // User confirms
+  proofUrls    String[]  // Photo proof submitted by runner
+
+  // Foreign keys
+  taskId        String @unique
+  runnerId      String
+  applicationId String @unique
+  completionOTP String? // Generated when task starts, verified to complete
+
+  // Relations
+  task        Task            @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  runner      User            @relation("RunnerAssignments", fields: [runnerId], references: [id])
+  application TaskApplication @relation(fields: [applicationId], references: [id])
+
+  @@map("assignments")
+}
+
+
+model TaskPayment {
+  id          String        @id @default(uuid())
+  amount      Decimal       @db.Decimal(10, 2)
+  platformFee Decimal       @db.Decimal(10, 2)
+  runnerPayout Decimal      @db.Decimal(10, 2) // amount - platformFee
+  status      PaymentStatus @default(PENDING)
+  escrowedAt  DateTime?
+  releasedAt  DateTime?
+  refundedAt  DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Foreign key
+  taskId String @unique
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@map("task_payments")
+}
+
+
+model Review {
+  id        String   @id @default(uuid())
+  rating    Int      
+  comment   String?
+  createdAt DateTime @default(now())
+
+  // Foreign keys
+  taskId     String
+  reviewerId String
+  revieweeId String
+
+  task     Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  reviewer User @relation("Reviewer", fields: [reviewerId], references: [id])
+  reviewee User @relation("Reviewee", fields: [revieweeId], references: [id])
+
+  @@unique([taskId, reviewerId, revieweeId])
+  @@map("reviews")
+}
+
+
+model Wallet {
+  id        String   @id @default(uuid())
+  balance   Decimal  @default(0.00) @db.Decimal(12, 2)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Foreign key
+  userId String @unique
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@map("wallets")
+}
+
+
+model Transaction {
+  id          String            @id @default(uuid())
+  amount      Decimal           @db.Decimal(10, 2)
+  type        TransactionType
+  status      TransactionStatus @default(PENDING)
+  reason      TransactionReason
+  reference   String?           // External payment ref (bKash, Nagad, card)
+  note        String?
+  createdAt   DateTime          @default(now())
+
+  // Foreign key
+  walletId String
+
+  wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  @@map("transactions")
+}
+
+
+model Dispute {
+  id          String        @id @default(uuid())
+  reason      String
+  evidence    String[]      
+  status      DisputeStatus @default(OPEN)
+  adminNotes  String?
+  resolvedAt  DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Foreign keys
+  taskId      String @unique
+  raisedById  String
+
+  task       Task @relation(fields: [taskId], references: [id])
+  raisedBy   User @relation("DisputeRaisedBy", fields: [raisedById], references: [id])
+
+  @@map("disputes")
+}
+
+
+model SosAlert {
+  id          String   @id @default(uuid())
+  lat         Float
+  lng         Float
+  message     String?
+  isResolved  Boolean  @default(false)
+  resolvedAt  DateTime?
+  createdAt   DateTime @default(now())
+
+  // Foreign key
+  userId String
+  taskId String? // Link to active task if it happened during work
+  task   Task?   @relation(fields: [taskId], references: [id])
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sos_alerts")
+}
+
+
+model Notification {
+  id        String           @id @default(uuid())
+  type      NotificationType
+  title     String
+  message   String
+  read      Boolean          @default(false)
+  data      Json?            // Extra payload (taskId, etc.)
+  createdAt DateTime         @default(now())
+
+  // Foreign key
+  userId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+
+model Badge {
+  id          String    @id @default(uuid())
+  type        BadgeType
+  label       String
+  description String
+  iconUrl     String?
+
+  userBadges UserBadge[]
+
+  @@map("badges")
+}
+
+model UserBadge {
+  id        String   @id @default(uuid())
+  awardedAt DateTime @default(now())
+
+  userId  String
+  badgeId String
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge Badge @relation(fields: [badgeId], references: [id])
+
+  @@unique([userId, badgeId])
+  @@map("user_badges")
 }

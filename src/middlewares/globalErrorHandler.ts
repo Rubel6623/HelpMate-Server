@@ -23,17 +23,20 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
     statusCode = simplifiedError?.statusCode;
     message = simplifiedError?.message;
     errorSource = simplifiedError?.errorSources;
-  } else if (err instanceof Prisma.PrismaClientValidationError) {
+  } 
+  else if (err instanceof Prisma.PrismaClientValidationError) {
     const simplifiedError = handlePrismaValidationError(err);
     statusCode = simplifiedError?.statusCode;
     message = simplifiedError?.message;
     errorSource = simplifiedError?.errorSources;
-  } else if (err instanceof Prisma.PrismaClientKnownRequestError) {
+  } 
+  else if (err instanceof Prisma.PrismaClientKnownRequestError) {
     const simplifiedError = handlePrismaClientKnownRequestError(err);
     statusCode = simplifiedError?.statusCode;
     message = simplifiedError?.message;
     errorSource = simplifiedError?.errorSources;
-  } else if (err instanceof AppError) {
+  } 
+  else if (err instanceof AppError) {
     statusCode = err?.statusCode;
     message = err.message;
     errorSource = [
@@ -42,7 +45,8 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
         message: err?.message,
       },
     ];
-  } else if (err instanceof Error) {
+  } 
+  else if (err instanceof Error) {
     message = err.message;
     errorSource = [
       {
