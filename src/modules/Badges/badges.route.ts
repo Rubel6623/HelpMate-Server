@@ -15,6 +15,18 @@ router.get(
   BadgesController.getAllBadges
 );
 
+router.get(
+  '/:id',
+  auth(UserRole.ADMIN, UserRole.SUPERADMIN),
+  BadgesController.getBadgeById
+)
+
+router.patch(
+  '/:id',
+  auth(UserRole.ADMIN, UserRole.SUPERADMIN),
+  BadgesController.updateBadge
+)
+
 router.delete(
   '/:id',
   auth(UserRole.ADMIN, UserRole.SUPERADMIN),

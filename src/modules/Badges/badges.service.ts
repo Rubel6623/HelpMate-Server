@@ -12,6 +12,21 @@ const getAllBadges = async () => {
   return result;
 };
 
+const getBadgeById = async (id: string) => {
+  const result = await prisma.badge.findUnique({
+    where: { id }
+  });
+  return result;
+};
+
+const updateBadge = async (id: string, payload: { type: any; label: string; description: string; iconUrl?: string }) => {
+  const result = await prisma.badge.update({
+    where: { id },
+    data: payload
+  });
+  return result;
+};
+
 const deleteBadge = async (id: string) => {
   const result = await prisma.badge.delete({
     where: { id }
@@ -22,5 +37,7 @@ const deleteBadge = async (id: string) => {
 export const BadgesService = {
   createBadge,
   getAllBadges,
-  deleteBadge
+  deleteBadge,
+  getBadgeById,
+  updateBadge,
 };
