@@ -35,6 +35,14 @@ const updateUserStatus = async (id: string, isActive: boolean) => {
   return result;
 };
 
+const updateUserRole = async (id: string, role: string) => {
+  const result = await prisma.user.update({
+    where: { id },
+    data: { role: role.toUpperCase() as any }
+  });
+  return result;
+};
+
 const deleteUser = async (id: string) => {
   const result = await prisma.user.delete({
     where: { id }
@@ -46,5 +54,6 @@ export const UserService = {
   getAllUsers,
   getUserById,
   updateUserStatus,
+  updateUserRole,
   deleteUser
 };

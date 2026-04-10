@@ -22,6 +22,12 @@ router.patch(
   UserController.updateUserStatus
 );
 
+router.patch(
+  '/:id/role',
+  auth(UserRole.SUPERADMIN),
+  UserController.updateUserRole
+);
+
 router.delete(
   '/:id',
   auth(UserRole.SUPERADMIN),
