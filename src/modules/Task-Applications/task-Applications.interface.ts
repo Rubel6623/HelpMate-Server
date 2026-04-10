@@ -1,3 +1,3 @@
-export type TTask-Applications = {
+export type TTaskApplications = {
     // Add interface properties here
     };

@@ -1,3 +1,3 @@
-export const Runner-ProfilesSearchableFields = [
+export const RunnerProfilesSearchableFields = [
     // Add searchable fields here
     ];

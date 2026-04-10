@@ -14,7 +14,7 @@ const auth = (...roles: UserRole[]) => {
 
       const decoded = jwt.verify(
         token,
-        process.env.JWT_SECRET as string,
+        process.env.JWT_SECRET?.trim() as string,
       ) as JwtPayload;
 
       const { id, role } = decoded;

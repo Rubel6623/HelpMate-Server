@@ -1,3 +1,4 @@
-export const Task-Status-LogsController = {
+export const TaskStatusLogsController = {
     // Add controller methods here
     };
+

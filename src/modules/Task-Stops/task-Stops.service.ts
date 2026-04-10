@@ -1,3 +1,3 @@
-export const Task-StopsService = {
+export const TaskStopsService = {
     // Add service methods here
     };

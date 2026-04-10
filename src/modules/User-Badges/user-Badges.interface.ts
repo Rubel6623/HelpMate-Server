@@ -1,3 +1,3 @@
-export type TUser-Badges = {
+export type TUserBadges = {
     // Add interface properties here
     };

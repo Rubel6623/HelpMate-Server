@@ -1,3 +1,3 @@
-export type TRunner-Profiles = {
+export type TRunnerProfiles = {
     // Add interface properties here
     };

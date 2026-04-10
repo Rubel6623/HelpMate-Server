@@ -27,7 +27,7 @@ const createUserIntoDB = async (payload: IRegisterPayload) => {
         email: payload.email,
         phone: payload.phone,
         passwordHash: hashPassword,
-        role: payload.role,
+        role: payload.role.toUpperCase() as UserRole,
         avatarUrl: payload.avatarUrl
       },
     });
@@ -65,7 +65,7 @@ const loginUserIntoDB = async (payload: ILoginPayload) => {
     verificationStatus: user.verificationStatus
   }
 
-  const token = jwt.sign(userData, process.env.JWT_SECRET as string, { expiresIn: '1d' });
+  const token = jwt.sign(userData, process.env.JWT_SECRET as string, { expiresIn: '2d' });
 
   return {
     token,
@@ -104,6 +104,9 @@ const updateMeInDB = async (userId: string, payload: Partial<IRegisterPayload>) 
   if (payload.password) {
     updateData.passwordHash = await bcrypt.hash(payload.password, 8);
     delete updateData.password;
+  }
+  if (payload.role) {
+    updateData.role = payload.role.toUpperCase() as UserRole;
   }
 
   const result = await prisma.user.update({

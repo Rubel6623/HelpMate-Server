@@ -1,3 +1,3 @@
-export const User-BadgesSearchableFields = [
+export const UserBadgesSearchableFields = [
     // Add searchable fields here
     ];

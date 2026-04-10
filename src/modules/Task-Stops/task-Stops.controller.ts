@@ -1,3 +1,4 @@
-export const Task-StopsController = {
+export const TaskStopsController = {
     // Add controller methods here
     };
+

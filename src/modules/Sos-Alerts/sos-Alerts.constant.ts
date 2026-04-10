@@ -1,3 +1,3 @@
-export const Sos-AlertsSearchableFields = [
+export const SosAlertsSearchableFields = [
     // Add searchable fields here
     ];

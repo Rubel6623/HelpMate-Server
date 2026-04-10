@@ -1,3 +1,3 @@
-export const Task-PaymentsSearchableFields = [
+export const TaskPaymentsSearchableFields = [
     // Add searchable fields here
     ];

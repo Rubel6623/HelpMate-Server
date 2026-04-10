@@ -1,3 +1,3 @@
-export type TTask-Payments = {
+export type TTaskPayments = {
     // Add interface properties here
     };

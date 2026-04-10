@@ -1,3 +1,3 @@
-export const Task-Status-LogsSearchableFields = [
+export const TaskStatusLogsSearchableFields = [
     // Add searchable fields here
     ];

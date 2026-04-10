@@ -1,3 +1,3 @@
-export type TSos-Alerts = {
+export type TSosAlerts = {
     // Add interface properties here
     };

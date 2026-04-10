@@ -1,3 +1,3 @@
-export const Task-Status-LogsService = {
+export const TaskStatusLogsService = {
     // Add service methods here
     };

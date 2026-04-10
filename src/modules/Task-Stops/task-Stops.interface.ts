@@ -1,3 +1,3 @@
-export type TTask-Stops = {
+export type TTaskStops = {
     // Add interface properties here
     };

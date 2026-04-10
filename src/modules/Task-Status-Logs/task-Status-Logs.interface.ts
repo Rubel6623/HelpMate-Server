@@ -1,3 +1,3 @@
-export type TTask-Status-Logs = {
+export type TTaskStatusLogs = {
     // Add interface properties here
     };

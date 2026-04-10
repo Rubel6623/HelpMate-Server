@@ -1,3 +1,3 @@
-export const Task-PaymentsService = {
+export const TaskPaymentsService = {
     // Add service methods here
     };

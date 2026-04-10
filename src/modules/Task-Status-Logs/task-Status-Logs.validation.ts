@@ -1,6 +1,6 @@
 import { MAX_UPLOAD_SIZE } from '../../constants';
 // import { z } from 'zod';
 
-export const task-Status-LogsValidationSchema = {
+export const taskStatusLogsValidationSchema = {
     // Add validation schemas here
     };
