@@ -1,3 +1,3 @@
-export type TTaskApplications = {
-    // Add interface properties here
-    };
+import { TaskApplication } from '../../../generated/prisma';
+
+export type TTaskApplication = Partial<TaskApplication>;

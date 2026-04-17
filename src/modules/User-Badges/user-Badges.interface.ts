@@ -1,3 +1,3 @@
-export type TUserBadges = {
-    // Add interface properties here
-    };
+import { UserBadge } from '../../../generated/prisma';
+
+export type TUserBadge = Partial<UserBadge>;

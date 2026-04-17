@@ -1,6 +1,14 @@
-import { MAX_UPLOAD_SIZE } from '../../constants';
-// import { z } from 'zod';
+import { z } from 'zod';
+
+const createsosAlertsValidationSchema = z.object({
+  body: z.object({}).passthrough(),
+});
+
+const updatesosAlertsValidationSchema = z.object({
+  body: z.object({}).passthrough(),
+});
 
 export const sosAlertsValidationSchema = {
-    // Add validation schemas here
-    };
+  createsosAlertsValidationSchema,
+  updatesosAlertsValidationSchema,
+};

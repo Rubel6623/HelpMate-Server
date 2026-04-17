@@ -1,6 +1,14 @@
-import { MAX_UPLOAD_SIZE } from '../../constants';
-// import { z } from 'zod';
+import { z } from 'zod';
+
+const createnotificationsValidationSchema = z.object({
+  body: z.object({}).passthrough(),
+});
+
+const updatenotificationsValidationSchema = z.object({
+  body: z.object({}).passthrough(),
+});
 
 export const notificationsValidationSchema = {
-    // Add validation schemas here
-    };
+  createnotificationsValidationSchema,
+  updatenotificationsValidationSchema,
+};

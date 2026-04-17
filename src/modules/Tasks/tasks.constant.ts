@@ -1,3 +1,1 @@
-export const TasksSearchableFields = [
-    // Add searchable fields here
-    ];
+export const tasksSearchableFields = ['id'];

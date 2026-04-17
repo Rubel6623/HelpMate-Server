@@ -6,7 +6,7 @@ import { prisma } from '../lib/prisma';
 const auth = (...roles: UserRole[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const token = req.headers.authorization;
+      const token = req.headers.authorization || req.cookies.token;
 
       if (!token) {
         throw new Error('You are not authorized!');

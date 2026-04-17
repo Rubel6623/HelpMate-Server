@@ -8,6 +8,8 @@ router.post('/register', AuthController.createUser);
 
 router.post('/login', AuthController.loginUser);
 
+router.post('/logout', AuthController.logoutUser);
+
 router.get('/me', auth(UserRole.ADMIN, UserRole.USER, UserRole.RUNNER, UserRole.SUPERADMIN), AuthController.getMe);
 
 router.put('/me', auth(UserRole.ADMIN, UserRole.USER, UserRole.RUNNER, UserRole.SUPERADMIN), AuthController.updateMe);

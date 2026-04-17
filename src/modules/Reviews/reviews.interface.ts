@@ -1,3 +1,3 @@
-export type TReviews = {
-    // Add interface properties here
-    };
+import { Review } from '../../../generated/prisma';
+
+export type TReview = Partial<Review>;

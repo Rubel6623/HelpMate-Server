@@ -1,3 +1,3 @@
-export type TTaskPayments = {
-    // Add interface properties here
-    };
+import { TaskPayment } from '../../../generated/prisma';
+
+export type TTaskPayment = Partial<TaskPayment>;

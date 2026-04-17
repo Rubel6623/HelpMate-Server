@@ -1,3 +1,3 @@
-export type TSosAlerts = {
-    // Add interface properties here
-    };
+import { SosAlert } from '../../../generated/prisma';
+
+export type TSosAlert = Partial<SosAlert>;

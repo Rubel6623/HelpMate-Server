@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { AuthService } from "./auth.service";
+import config from "../../config";
 
 const createUser = async (req: Request, res: Response) => {
   try {
@@ -27,7 +28,7 @@ const loginUser = async (req: Request, res: Response) => {
     const result = await AuthService.loginUserIntoDB(req.body);
     res.cookie("token", result.token, {
       httpOnly: true,
-      secure: false,
+      secure: config.node_env === "production",
       sameSite: "strict",
     })
       res.status(200).json({
@@ -96,11 +97,21 @@ const updateMe = async (req: Request, res: Response) => {
 };
 
 
+const logoutUser = async (req: Request, res: Response) => {
+  res.clearCookie("token");
+  res.status(200).json({
+    success: true,
+    message: "User logged out successfully",
+  });
+};
+
+
 export const AuthController = {
   createUser,
   loginUser,
   getMe,
-  updateMe
+  updateMe,
+  logoutUser
 };
 
 

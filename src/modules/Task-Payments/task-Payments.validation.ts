@@ -1,6 +1,14 @@
-import { MAX_UPLOAD_SIZE } from '../../constants';
-// import { z } from 'zod';
+import { z } from 'zod';
+
+const createtaskPaymentsValidationSchema = z.object({
+  body: z.object({}).passthrough(),
+});
+
+const updatetaskPaymentsValidationSchema = z.object({
+  body: z.object({}).passthrough(),
+});
 
 export const taskPaymentsValidationSchema = {
-    // Add validation schemas here
-    };
+  createtaskPaymentsValidationSchema,
+  updatetaskPaymentsValidationSchema,
+};

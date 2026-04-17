@@ -14,6 +14,10 @@ import { UserRoutes } from '../modules/User/user.route';
 import { TransactionsRoutes } from '../modules/Transactions/transactions.route';
 import { BadgesRoutes } from '../modules/Badges/badges.route';
 import { UserBadgesRoutes } from '../modules/User-Badges/user-Badges.route';
+import { TaskStopsRoutes } from '../modules/Task-Stops/task-Stops.route';
+import { TaskStatusLogsRoutes } from '../modules/Task-Status-Logs/task-Status-Logs.route';
+import { TaskPaymentsRoutes } from '../modules/Task-Payments/task-Payments.route';
+import { PaymentRoutes } from '../modules/Payment/payment.route';
 
 const router = Router();
 
@@ -33,6 +37,18 @@ const moduleRoutes: { path: string; route: any }[] = [
   {
     path: '/tasks',
     route: TasksRoutes,
+  },
+  {
+    path: '/task-stops',
+    route: TaskStopsRoutes,
+  },
+  {
+    path: '/task-status-logs',
+    route: TaskStatusLogsRoutes,
+  },
+  {
+    path: '/task-payments',
+    route: TaskPaymentsRoutes,
   },
   {
     path: '/task-applications',
@@ -77,6 +93,10 @@ const moduleRoutes: { path: string; route: any }[] = [
   {
     path: '/user-badges',
     route: UserBadgesRoutes,
+  },
+  {
+    path: '/payment',
+    route: PaymentRoutes,
   },
 ];
 

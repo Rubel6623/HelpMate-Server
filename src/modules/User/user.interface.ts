@@ -1,3 +1,3 @@
-export type TUser = {
-    // Add interface properties here
-    };
+import { User } from '../../../generated/prisma';
+
+export type TUser = Partial<User>;

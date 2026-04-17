@@ -1,6 +1,7 @@
+import { NotificationType } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 
-const createNotification = async (payload: { userId: string; type: any; title: string; message: string; data?: any }) => {
+const createNotification = async (payload: { userId: string; type: NotificationType; title: string; message: string; data?: any }) => {
   const result = await prisma.notification.create({
     data: payload
   });
@@ -17,9 +18,12 @@ const getMyNotifications = async (userId: string) => {
   return result;
 };
 
-const markAsRead = async (id: string) => {
+const markAsRead = async (id: string, userId: string) => {
   const result = await prisma.notification.update({
-    where: { id },
+    where: {
+      id,
+      userId
+    },
     data: { read: true }
   });
   return result;

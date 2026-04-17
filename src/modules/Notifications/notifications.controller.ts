@@ -3,6 +3,16 @@ import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { NotificationsService } from './notifications.service';
 
+const createNotification = catchAsync(async (req: Request, res: Response) => {
+  const result = await NotificationsService.createNotification(req.body);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Notification created successfully',
+    data: result,
+  });
+});
+
 const getMyNotifications = catchAsync(async (req: Request, res: Response) => {
   const userId = (req as any).user.id;
   const result = await NotificationsService.getMyNotifications(userId);
@@ -16,7 +26,8 @@ const getMyNotifications = catchAsync(async (req: Request, res: Response) => {
 
 const markAsRead = catchAsync(async (req: Request, res: Response) => {
   const id = req.params.id as string;
-  const result = await NotificationsService.markAsRead(id);
+  const userId = (req as any).user.id;
+  const result = await NotificationsService.markAsRead(id, userId);
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -26,6 +37,7 @@ const markAsRead = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const NotificationsController = {
+  createNotification,
   getMyNotifications,
   markAsRead,
 };

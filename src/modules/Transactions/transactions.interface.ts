@@ -1,3 +1,3 @@
-export type TTransactions = {
-    // Add interface properties here
-    };
+import { Transaction } from '../../../generated/prisma';
+
+export type TTransaction = Partial<Transaction>;

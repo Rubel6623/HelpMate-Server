@@ -4,6 +4,12 @@ import { NotificationsController } from './notifications.controller';
 
 const router = express.Router();
 
+router.post(
+  '/',
+  auth(UserRole.ADMIN, UserRole.SUPERADMIN),
+  NotificationsController.createNotification
+);
+
 router.get(
   '/',
   auth(UserRole.USER, UserRole.RUNNER, UserRole.ADMIN, UserRole.SUPERADMIN),

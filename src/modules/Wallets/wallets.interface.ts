@@ -1,3 +1,3 @@
-export type TWallets = {
-    // Add interface properties here
-    };
+import { Wallet } from '../../../generated/prisma';
+
+export type TWallet = Partial<Wallet>;

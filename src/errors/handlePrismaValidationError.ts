@@ -5,18 +5,18 @@ import { TErrorSources, TGenericErrorResponse } from '../interfaces/error.interf
 const handlePrismaValidationError = (
   err: Prisma.PrismaClientValidationError,
 ): TGenericErrorResponse => {
-  const errorSources: TErrorSources = (err as any).issues.map((issue: ZodIssue) => {
-    return {
-      path: issue?.path[issue.path.length - 1] as string | number,
-      message: issue.message,
-    };
-  });
+  const errorSources: TErrorSources = [
+    {
+      path: '',
+      message: err.message,
+    },
+  ];
 
   const statusCode = 400;
 
   return {
     statusCode,
-    message: 'Validation Error',
+    message: 'Prisma Validation Error',
     errorSources,
   };
 };

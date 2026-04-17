@@ -1,3 +1,1 @@
-export const TransactionsSearchableFields = [
-    // Add searchable fields here
-    ];
+export const transactionsSearchableFields = ['id'];

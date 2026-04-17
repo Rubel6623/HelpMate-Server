@@ -1,6 +1,14 @@
-import { MAX_UPLOAD_SIZE } from '../../constants';
-// import { z } from 'zod';
+import { z } from 'zod';
+
+const createuserBadgesValidationSchema = z.object({
+  body: z.object({}).passthrough(),
+});
+
+const updateuserBadgesValidationSchema = z.object({
+  body: z.object({}).passthrough(),
+});
 
 export const userBadgesValidationSchema = {
-    // Add validation schemas here
-    };
+  createuserBadgesValidationSchema,
+  updateuserBadgesValidationSchema,
+};

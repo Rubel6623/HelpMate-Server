@@ -2,19 +2,21 @@ import { prisma } from "../../lib/prisma";
 import { TaskStatus } from "../../../generated/prisma/enums";
 
 const createTask = async (userId: string, payload: any) => {
-  const { stops, ...taskData } = payload;
+  const { stops, locationLabel, ...taskData } = payload;
   
   const result = await prisma.$transaction(async (tx) => {
     const task = await tx.task.create({
       data: {
         ...taskData,
         userId,
-        stops: {
-          create: stops.map((stop: any, index: number) => ({
-            ...stop,
-            order: index + 1
-          }))
-        }
+        ...(stops && Array.isArray(stops) && stops.length > 0 ? {
+          stops: {
+            create: stops.map((stop: any, index: number) => ({
+              ...stop,
+              order: index + 1
+            }))
+          }
+        } : {})
       },
       include: {
         stops: true

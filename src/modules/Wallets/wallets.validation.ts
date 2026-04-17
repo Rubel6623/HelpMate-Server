@@ -1,6 +1,14 @@
-import { MAX_UPLOAD_SIZE } from '../../constants';
-// import { z } from 'zod';
+import { z } from 'zod';
+
+const createwalletsValidationSchema = z.object({
+  body: z.object({}).passthrough(),
+});
+
+const updatewalletsValidationSchema = z.object({
+  body: z.object({}).passthrough(),
+});
 
 export const walletsValidationSchema = {
-    // Add validation schemas here
-    };
+  createwalletsValidationSchema,
+  updatewalletsValidationSchema,
+};

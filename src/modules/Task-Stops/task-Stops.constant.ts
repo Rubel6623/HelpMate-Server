@@ -1,3 +1,2 @@
-export const TaskStopsSearchableFields = [
-    // Add searchable fields here
-    ];
+export const TaskStopsSearchableFields = ['locationLabel', 'address'];
+

@@ -1,3 +1,3 @@
-export type TRunnerProfiles = {
-    // Add interface properties here
-    };
+import { RunnerProfile } from '../../../generated/prisma';
+
+export type TRunnerProfile = Partial<RunnerProfile>;

@@ -1,3 +1,1 @@
-export const WalletsSearchableFields = [
-    // Add searchable fields here
-    ];
+export const walletsSearchableFields = ['id'];
