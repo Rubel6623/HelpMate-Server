@@ -1,6 +1,8 @@
 import { Prisma } from '../../generated/prisma';
-import { ZodIssue } from 'zod';
-import { TErrorSources, TGenericErrorResponse } from '../interfaces/error.interface';
+import {
+  TErrorSources,
+  TGenericErrorResponse,
+} from '../interfaces/error.interface';
 
 const handlePrismaValidationError = (
   err: Prisma.PrismaClientValidationError,
@@ -16,9 +18,10 @@ const handlePrismaValidationError = (
 
   return {
     statusCode,
-    message: 'Prisma Validation Error',
+    message: 'Validation Error',
     errorSources,
   };
 };
 
 export default handlePrismaValidationError;
+

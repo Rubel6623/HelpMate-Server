@@ -20,7 +20,7 @@ const createPaymentIntent = catchAsync(async (req: Request, res: Response) => {
 
 const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
   const sig = req.headers['stripe-signature'] as string;
-  let event;
+  let event: any;
 
   try {
     event = stripe.webhooks.constructEvent(
@@ -34,7 +34,7 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
 
   // Handle successful payment
   if (event.type === 'payment_intent.succeeded') {
-    const paymentIntent = event.data.object as Stripe.PaymentIntent;
+    const paymentIntent = event.data.object as any;
     const taskId = paymentIntent.metadata?.taskId;
 
     if (taskId) {

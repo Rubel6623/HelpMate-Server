@@ -1,3 +1,4 @@
+import config from "../../config";
 import { prisma } from "../../lib/prisma";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -65,7 +66,9 @@ const loginUserIntoDB = async (payload: ILoginPayload) => {
     verificationStatus: user.verificationStatus
   }
 
-  const token = jwt.sign(userData, process.env.JWT_SECRET as string, { expiresIn: '2d' });
+  const token = jwt.sign(userData, config.jwt_secret as string, {
+    expiresIn: (config.jwt_expires_in as any) || '2d',
+  });
 
   return {
     token,
