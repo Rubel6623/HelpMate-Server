@@ -65,42 +65,42 @@ const updateApplicationStatus = async (applicationId: string, status: Applicatio
 
     // If application is accepted, assign the task to this runner and update task status
     if (status === ApplicationStatus.ACCEPTED) {
-       // Reject other applications for the same task
-       await tx.taskApplication.updateMany({
-         where: {
-           taskId: updatedApp.taskId,
-           id: { not: applicationId }
-         },
-         data: { status: ApplicationStatus.REJECTED }
-       });
+      // Reject other applications for the same task
+      await tx.taskApplication.updateMany({
+        where: {
+          taskId: updatedApp.taskId,
+          id: { not: applicationId }
+        },
+        data: { status: ApplicationStatus.REJECTED }
+      });
 
-       // Update task status
-       await tx.task.update({
-         where: { id: updatedApp.taskId },
-         data: { status: TaskStatus.ASSIGNED }
-       });
+      // Update task status
+      await tx.task.update({
+        where: { id: updatedApp.taskId },
+        data: { status: TaskStatus.ASSIGNED }
+      });
 
-       // Create Assignment
-       await tx.assignment.create({
-         data: {
-           taskId: updatedApp.taskId,
-           runnerId: updatedApp.runnerId,
-           applicationId: updatedApp.id
-         }
-       });
-       
-       await tx.taskStatusLog.create({
-         data: {
-           taskId: updatedApp.taskId,
-           status: TaskStatus.ASSIGNED,
-           note: 'Task assigned to runner'
-         }
-       });
+      // Create Assignment
+      await tx.assignment.create({
+        data: {
+          taskId: updatedApp.taskId,
+          runnerId: updatedApp.runnerId,
+          applicationId: updatedApp.id
+        }
+      });
+
+      await tx.taskStatusLog.create({
+        data: {
+          taskId: updatedApp.taskId,
+          status: TaskStatus.ASSIGNED,
+          note: 'Task assigned to runner'
+        }
+      });
     }
 
     return updatedApp;
   });
-  
+
   return result;
 };
 

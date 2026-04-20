@@ -7,7 +7,7 @@ const router = express.Router();
 router.put(
   '/my-profile',
   auth(UserRole.RUNNER),
-  RunnerProfilesController.upsertProfile
+  RunnerProfilesController.updateProfile
 );
 
 router.get(

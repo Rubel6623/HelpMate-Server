@@ -2,12 +2,16 @@ import { prisma } from "../../lib/prisma";
 import { TaskStatus } from "../../../generated/prisma/enums";
 
 const createTask = async (userId: string, payload: any) => {
-  const { stops, locationLabel, ...taskData } = payload;
+  const { stops, locationLabel, location, deadline, estimatedPrice, ...taskData } = payload;
   
   const result = await prisma.$transaction(async (tx) => {
     const task = await tx.task.create({
       data: {
         ...taskData,
+        offerPrice: estimatedPrice || payload.offerPrice,
+        timeWindowStart: payload.timeWindowStart || new Date(),
+        timeWindowEnd: deadline || payload.timeWindowEnd || new Date(),
+        estimatedDuration: payload.estimatedDuration || 60,
         userId,
         ...(stops && Array.isArray(stops) && stops.length > 0 ? {
           stops: {
@@ -16,7 +20,16 @@ const createTask = async (userId: string, payload: any) => {
               order: index + 1
             }))
           }
-        } : {})
+        } : (location || locationLabel ? {
+          stops: {
+            create: [{
+              locationLabel: locationLabel || location,
+              locationLat: payload.locationLat || 0.0,
+              locationLng: payload.locationLng || 0.0,
+              order: 1
+            }]
+          }
+        } : {}))
       },
       include: {
         stops: true

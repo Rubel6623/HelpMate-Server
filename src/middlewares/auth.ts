@@ -14,7 +14,12 @@ const httpStatus = {
 
 const auth = (...requiredRoles: UserRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.headers.authorization || req.cookies.token;
+    let token = req.headers.authorization || req.cookies.token;
+
+    // Check if token starts with Bearer
+    if (token && token.startsWith('Bearer ')) {
+      token = token.split(' ')[1];
+    }
 
     if (!token) {
       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!');

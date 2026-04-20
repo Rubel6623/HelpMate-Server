@@ -1,6 +1,6 @@
 import { prisma } from "../../lib/prisma";
 
-const createCategory = async (payload: { name: string; icon?: string; avgDurationMin?: number }) => {
+const createCategory = async (payload: { name: string; icon?: string; avgDurationMin?: number; description?: string }) => {
   const result = await prisma.category.create({
     data: payload,
   });
@@ -23,7 +23,7 @@ const getSingleCategory = async (id: string) => {
   return result;
 };
 
-const updateCategory = async (id: string, payload: { name?: string; icon?: string; avgDurationMin?: number; isActive?: boolean }) => {
+const updateCategory = async (id: string, payload: { name?: string; icon?: string; avgDurationMin?: number; description?: string; isActive?: boolean }) => {
   const result = await prisma.category.update({
     where: { id },
     data: payload,

@@ -1,13 +1,9 @@
 import { prisma } from "../../lib/prisma";
 
-const upsertProfile = async (userId: string, payload: any) => {
-  const result = await prisma.runnerProfile.upsert({
+const updateProfile = async (userId: string, payload: any) => {
+  const result = await prisma.runnerProfile.update({
     where: { userId },
-    update: payload,
-    create: {
-      ...payload,
-      userId
-    }
+    data: payload,
   });
   return result;
 };
@@ -61,7 +57,7 @@ const verifyProfile = async (id: string, isVerified: boolean) => {
 };
 
 export const RunnerProfilesService = {
-  upsertProfile,
+  updateProfile,
   getProfile,
   getAllRunners,
   verifyProfile

@@ -149,6 +149,7 @@ model RunnerProfile {
   acceptanceRate     Float    @default(0.0) 
   isVerified         Boolean  @default(false)
   verifiedAt         DateTime?
+  skills             String[]
   bio                String?
   isOnline           Boolean @default(false) 
   preferredRadius    Float   @default(5.0)   
@@ -169,7 +170,8 @@ model Category {
   id              String  @id @default(uuid())
   name            String  @unique
   icon            String?
-  avgDurationMin  Int?    
+  avgDurationMin  Int?
+  description     String?
   isActive        Boolean @default(true)
 
   tasks Task[]

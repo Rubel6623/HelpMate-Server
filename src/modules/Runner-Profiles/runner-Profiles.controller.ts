@@ -3,9 +3,9 @@ import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { RunnerProfilesService } from './runner-Profiles.service';
 
-const upsertProfile = catchAsync(async (req: Request, res: Response) => {
+const updateProfile = catchAsync(async (req: Request, res: Response) => {
   const userId = (req as any).user.id;
-  const result = await RunnerProfilesService.upsertProfile(userId, req.body);
+  const result = await RunnerProfilesService.updateProfile(userId, req.body);
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -48,7 +48,7 @@ const verifyProfile = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const RunnerProfilesController = {
-  upsertProfile,
+  updateProfile,
   getMyProfile,
   getAllRunners,
   verifyProfile,
