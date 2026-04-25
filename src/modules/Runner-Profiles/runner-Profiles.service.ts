@@ -1,9 +1,20 @@
 import { prisma } from "../../lib/prisma";
 
 const updateProfile = async (userId: string, payload: any) => {
-  const result = await prisma.runnerProfile.update({
+  if (payload.studentId === "" || payload.nationalId === "") {
+    throw new Error('Student ID and National ID cannot be empty');
+  }
+
+  const result = await prisma.runnerProfile.upsert({
     where: { userId },
-    data: payload,
+    update: payload,
+    create: {
+      userId,
+      ...payload,
+      // fallback for mandatory fields if not in payload
+      university: payload.university || "Unknown",
+      studentId: payload.studentId || "Unknown",
+    },
   });
   return result;
 };
@@ -27,22 +38,35 @@ const getProfile = async (userId: string) => {
 
 const getAllRunners = async (query: any) => {
   const { isVerified } = query;
-  const where: any = {};
-  if (isVerified !== undefined) where.isVerified = isVerified === 'true';
+  
+  const where: any = {
+    role: 'RUNNER'
+  };
 
-  const result = await prisma.runnerProfile.findMany({
+  // If isVerified is provided, we filter based on the runnerProfile's isVerified status
+  // Note: if isVerified=false, it will also include those who don't have a profile yet
+  
+  const result = await prisma.user.findMany({
     where,
     include: {
-      user: {
-        select: {
-          name: true,
-          email: true,
-          phone: true
-        }
-      }
+      runnerProfile: true
+    },
+    orderBy: {
+      createdAt: 'desc'
     }
   });
-  return result;
+
+  // Client side filtering for isVerified if needed, or refine the prisma query
+  let filteredResult = result;
+  if (isVerified !== undefined) {
+    const isVerifiedBool = isVerified === 'true';
+    filteredResult = result.filter(user => {
+      if (!user.runnerProfile) return !isVerifiedBool; // If no profile, they are unverified
+      return user.runnerProfile.isVerified === isVerifiedBool;
+    });
+  }
+
+  return filteredResult;
 };
 
 const verifyProfile = async (id: string, isVerified: boolean) => {

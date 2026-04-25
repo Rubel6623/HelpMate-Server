@@ -26,4 +26,10 @@ router.patch(
   TasksController.updateTaskStatus
 );
 
+router.delete(
+  '/:id',
+  auth(UserRole.USER, UserRole.ADMIN, UserRole.SUPERADMIN),
+  TasksController.deleteTask
+);
+
 export const TasksRoutes = router;

@@ -1,5 +1,6 @@
 import { prisma } from "../../lib/prisma";
-import { TaskStatus } from "../../../generated/prisma/enums";
+import { TaskStatus } from "../../../generated/prisma";
+import { PaymentService } from "../Payment/payment.service";
 
 const getMyAssignments = async (runnerId: string) => {
   const result = await prisma.assignment.findMany({
@@ -8,7 +9,15 @@ const getMyAssignments = async (runnerId: string) => {
       task: {
         include: {
           category: true,
-          stops: true
+          stops: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              phone: true,
+              avatarUrl: true
+            }
+          }
         }
       }
     },
@@ -42,7 +51,8 @@ const getSingleAssignment = async (id: string) => {
           id: true,
           name: true,
           phone: true,
-          avatarUrl: true
+          avatarUrl: true,
+          runnerProfile: true
         }
       }
     }
@@ -51,7 +61,6 @@ const getSingleAssignment = async (id: string) => {
 };
 
 const startAssignment = async (id: string) => {
-  // Generate a random 6-digit OTP for completion
   const completionOTP = Math.floor(100000 + Math.random() * 900000).toString();
 
   const result = await prisma.$transaction(async (tx) => {
@@ -82,7 +91,7 @@ const startAssignment = async (id: string) => {
   return result;
 };
 
-const completeAssignment = async (id: string, proofUrls: string[]) => {
+const submitAssignment = async (id: string, proofUrls: string[]) => {
   const result = await prisma.$transaction(async (tx) => {
     const assignment = await tx.assignment.update({
       where: { id },
@@ -94,14 +103,14 @@ const completeAssignment = async (id: string, proofUrls: string[]) => {
 
     await tx.task.update({
       where: { id: assignment.taskId },
-      data: { status: TaskStatus.COMPLETED }
+      data: { status: TaskStatus.SUBMITTED } // Rule 7.2
     });
 
     await tx.taskStatusLog.create({
       data: {
         taskId: assignment.taskId,
-        status: TaskStatus.COMPLETED,
-        note: 'Runner marked task as completed'
+        status: TaskStatus.SUBMITTED,
+        note: 'Runner submitted task for approval'
       }
     });
 
@@ -111,13 +120,23 @@ const completeAssignment = async (id: string, proofUrls: string[]) => {
   return result;
 };
 
-const confirmAssignment = async (id: string, otp: string) => {
+const approveAssignment = async (id: string, otp?: string, userId?: string) => {
   const assignment = await prisma.assignment.findUniqueOrThrow({
-    where: { id }
+    where: { id },
+    include: {
+      task: true,
+      runner: {
+        include: {
+          runnerProfile: true
+        }
+      }
+    }
   });
 
-  if (assignment.completionOTP !== otp) {
-    throw new Error('Invalid Completion OTP');
+  const isPoster = userId && assignment.task.userId === userId;
+
+  if (!isPoster && assignment.completionOTP !== otp) {
+    throw new Error('Invalid Completion OTP or unauthorized action');
   }
 
   const result = await prisma.$transaction(async (tx) => {
@@ -128,19 +147,24 @@ const confirmAssignment = async (id: string, otp: string) => {
 
     await tx.task.update({
       where: { id: updatedAssignment.taskId },
-      data: { status: TaskStatus.CONFIRMED }
+      data: { status: TaskStatus.COMPLETED } // Rule 7.3
     });
 
     await tx.taskStatusLog.create({
       data: {
         taskId: updatedAssignment.taskId,
-        status: TaskStatus.CONFIRMED,
-        note: 'User confirmed task completion'
+        status: TaskStatus.COMPLETED,
+        note: 'Buyer approved task'
       }
     });
 
     return updatedAssignment;
   });
+
+  // Release payment (Rule 6.3 & 7.3)
+  if (assignment.runner.runnerProfile?.stripeAccountId) {
+    await PaymentService.releasePayment(assignment.taskId, assignment.runner.runnerProfile.stripeAccountId);
+  }
 
   return result;
 };
@@ -149,6 +173,6 @@ export const AssignmentsService = {
   getMyAssignments,
   getSingleAssignment,
   startAssignment,
-  completeAssignment,
-  confirmAssignment
+  submitAssignment,
+  approveAssignment
 };

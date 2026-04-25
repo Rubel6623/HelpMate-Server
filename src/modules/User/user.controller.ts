@@ -26,8 +26,11 @@ const getUserById = catchAsync(async (req: Request, res: Response) => {
 
 const updateUserStatus = catchAsync(async (req: Request, res: Response) => {
   const id = req.params.id as string;
-  const { isActive } = req.body;
-  const result = await UserService.updateUserStatus(id, isActive);
+  const { isActive, verificationStatus } = req.body;
+  const result = await UserService.updateUserStatus(id, { 
+    ...(isActive !== undefined && { isActive }), 
+    ...(verificationStatus && { verificationStatus: verificationStatus as any }) 
+  });
   sendResponse(res, {
     statusCode: 200,
     success: true,

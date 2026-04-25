@@ -23,15 +23,15 @@ router.patch(
 );
 
 router.patch(
-  '/:id/complete',
+  '/:id/submit',
   auth(UserRole.RUNNER),
-  AssignmentsController.completeAssignment
+  AssignmentsController.submitAssignment
 );
 
 router.patch(
-  '/:id/confirm',
+  '/:id/approve',
   auth(UserRole.USER),
-  AssignmentsController.confirmAssignment
+  AssignmentsController.approveAssignment
 );
 
 export const AssignmentsRoutes = router;

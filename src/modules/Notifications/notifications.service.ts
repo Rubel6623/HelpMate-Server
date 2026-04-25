@@ -1,4 +1,4 @@
-import { NotificationType } from "../../../generated/prisma/enums";
+import { NotificationType } from "../../../generated/prisma";
 import { prisma } from "../../lib/prisma";
 
 const createNotification = async (payload: { userId: string; type: NotificationType; title: string; message: string; data?: any }) => {

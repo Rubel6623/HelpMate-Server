@@ -36,26 +36,27 @@ const startAssignment = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const completeAssignment = catchAsync(async (req: Request, res: Response) => {
+const submitAssignment = catchAsync(async (req: Request, res: Response) => {
   const id = req.params.id as string;
   const { proofUrls } = req.body;
-  const result = await AssignmentsService.completeAssignment(id, proofUrls);
+  const result = await AssignmentsService.submitAssignment(id, proofUrls);
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'Assignment marked as completed',
+    message: 'Assignment submitted for approval',
     data: result,
   });
 });
 
-const confirmAssignment = catchAsync(async (req: Request, res: Response) => {
+const approveAssignment = catchAsync(async (req: Request, res: Response) => {
   const id = req.params.id as string;
   const { otp } = req.body;
-  const result = await AssignmentsService.confirmAssignment(id, otp);
+  const userId = (req as any).user.id;
+  const result = await AssignmentsService.approveAssignment(id, otp, userId);
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'Assignment confirmed successfully',
+    message: 'Assignment approved and payment released',
     data: result,
   });
 });
@@ -64,6 +65,6 @@ export const AssignmentsController = {
   getMyAssignments,
   getSingleAssignment,
   startAssignment,
-  completeAssignment,
-  confirmAssignment,
+  submitAssignment,
+  approveAssignment,
 };

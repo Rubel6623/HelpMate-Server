@@ -18,7 +18,7 @@ router.get(
 
 router.get(
   '/',
-  auth(UserRole.ADMIN, UserRole.SUPERADMIN),
+  auth(UserRole.USER, UserRole.ADMIN, UserRole.SUPERADMIN),
   RunnerProfilesController.getAllRunners
 );
 

@@ -58,10 +58,23 @@ const updateTaskStatus = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const deleteTask = catchAsync(async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  const userId = (req as any).user.id;
+  const result = await TasksService.deleteTask(id, userId);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Task deleted successfully',
+    data: result,
+  });
+});
+
 export const TasksController = {
   createTask,
   getAllTasks,
   getSingleTask,
   getMyTasks,
   updateTaskStatus,
+  deleteTask,
 };

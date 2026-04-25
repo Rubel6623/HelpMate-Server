@@ -1,5 +1,6 @@
+import AppError from "../../errors/AppError";
 import { prisma } from "../../lib/prisma";
-import { TransactionType, TransactionStatus, TransactionReason } from "../../../generated/prisma/enums";
+import { TransactionType, TransactionStatus, TransactionReason } from "../../../generated/prisma";
 
 const getMyWallet = async (userId: string) => {
   const result = await prisma.wallet.findUnique({
@@ -53,11 +54,23 @@ const topUp = async (userId: string, amount: number, reference?: string) => {
 
 const withdraw = async (userId: string, amount: number) => {
   const wallet = await prisma.wallet.findUniqueOrThrow({
-    where: { userId }
+    where: { userId },
+    include: { 
+      user: { 
+        include: { 
+          runnerProfile: true 
+        } 
+      } 
+    }
   });
 
+  // Rule 5: Seller account check for payouts/withdrawals
+  if (!wallet.user.runnerProfile?.stripeAccountId) {
+    throw new AppError(400, 'Please connect your Stripe seller account before withdrawing funds.');
+  }
+
   if (Number(wallet.balance) < amount) {
-    throw new Error('Insufficient balance');
+    throw new AppError(400, 'Insufficient balance');
   }
 
   const result = await prisma.$transaction(async (tx) => {

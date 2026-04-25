@@ -4,7 +4,7 @@ import config from '../config';
 import AppError from '../errors/AppError';
 import { prisma } from '../lib/prisma';
 import catchAsync from '../utils/catchAsync';
-import { UserRole } from '../../generated/prisma/enums';
+import { UserRole } from '../../generated/prisma';
 
 const httpStatus = {
   UNAUTHORIZED: 401,

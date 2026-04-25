@@ -1,5 +1,5 @@
 import { prisma } from "../../lib/prisma";
-import { DisputeStatus } from "../../../generated/prisma/enums";
+import { DisputeStatus } from "../../../generated/prisma";
 
 const raiseDispute = async (raisedById: string, payload: any) => {
   const result = await prisma.dispute.create({

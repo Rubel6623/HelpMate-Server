@@ -2,7 +2,7 @@ import config from "../../config";
 import { prisma } from "../../lib/prisma";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { UserRole } from "../../../generated/prisma/enums";
+import { UserRole } from "../../../generated/prisma";
 
 interface ILoginPayload {
   email?: string;
@@ -17,21 +17,54 @@ interface IRegisterPayload {
   password: string;
   role: UserRole;
   avatarUrl?: string;
+  university?: string;
+  studentId?: string;
+  nationalId?: string;
 }
 
 const createUserIntoDB = async (payload: IRegisterPayload) => {
     const hashPassword = await bcrypt.hash(payload.password, 8);
 
-    const result = await prisma.user.create({
-      data: { 
-        name: payload.name,
-        email: payload.email,
-        phone: payload.phone,
-        passwordHash: hashPassword,
-        role: payload.role.toUpperCase() as UserRole,
-        avatarUrl: payload.avatarUrl
-      },
+    if (payload.role.toUpperCase() === UserRole.RUNNER) {
+      if (!payload.studentId || !payload.nationalId || !payload.university) {
+        throw new Error("University, Student ID, and National ID are required for runners");
+      }
+    }
+
+    const result = await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: { 
+          name: payload.name,
+          email: payload.email,
+          phone: payload.phone,
+          passwordHash: hashPassword,
+          role: payload.role.toUpperCase() as UserRole,
+          avatarUrl: payload.avatarUrl
+        },
+      });
+
+      if (payload.role.toUpperCase() === UserRole.RUNNER) {
+        await tx.runnerProfile.create({
+          data: {
+            userId: user.id,
+            university: payload.university!,
+            studentId: payload.studentId!,
+            nationalId: payload.nationalId!,
+          }
+        });
+      }
+
+      // Also create a wallet for all users
+      await tx.wallet.create({
+        data: {
+          userId: user.id,
+          balance: 0
+        }
+      });
+
+      return user;
     });
+
     const { passwordHash, ...userWithoutPassword } = result;
     return userWithoutPassword;
 };

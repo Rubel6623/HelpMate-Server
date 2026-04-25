@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../generated/prisma"
 }
 
@@ -24,13 +24,14 @@ enum VerificationStatus {
 }
 
 enum TaskStatus {
-  OPEN        
-  ASSIGNED    
-  IN_PROGRESS 
-  COMPLETED   
-  CONFIRMED   
+  PENDING
+  ACCEPTED
+  IN_PROGRESS
+  SUBMITTED
+  COMPLETED
+  RELEASED
   CANCELLED
-  DISPUTED    
+  DISPUTED
 }
 
 enum ApplicationStatus {
@@ -41,10 +42,10 @@ enum ApplicationStatus {
 }
 
 enum PaymentStatus {
-  PENDING
-  ESCROWED   
-  RELEASED   
-  REFUNDED   
+  AUTHORIZED
+  ESCROW
+  RELEASED
+  REFUNDED
   FAILED
 }
 
@@ -149,6 +150,7 @@ model RunnerProfile {
   acceptanceRate     Float    @default(0.0) 
   isVerified         Boolean  @default(false)
   verifiedAt         DateTime?
+  stripeAccountId    String?  // Connected Stripe account for payouts
   skills             String[]
   bio                String?
   isOnline           Boolean @default(false) 
@@ -186,7 +188,7 @@ model Task {
   description       String
   offerPrice        Decimal     @db.Decimal(10, 2)
   platformFee       Decimal     @default(0.00) @db.Decimal(10, 2) // Calculated at payment
-  status            TaskStatus  @default(OPEN)
+  status            TaskStatus  @default(PENDING)
   timeWindowStart   DateTime
   timeWindowEnd     DateTime
   estimatedDuration Int         // minutes
@@ -298,10 +300,11 @@ model TaskPayment {
   amount      Decimal       @db.Decimal(10, 2)
   platformFee Decimal       @db.Decimal(10, 2)
   runnerPayout Decimal      @db.Decimal(10, 2) // amount - platformFee
-  status      PaymentStatus @default(PENDING)
+  status      PaymentStatus @default(AUTHORIZED)
   escrowedAt  DateTime?
   releasedAt  DateTime?
   refundedAt  DateTime?
+  paymentIntentId String?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
@@ -309,9 +312,23 @@ model TaskPayment {
   taskId String @unique
 
   task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  transfer    Transfer?
 
   @@map("task_payments")
 }
+
+model Transfer {
+  id        String   @id @default(uuid())
+  paymentId String   @unique
+  stripeId  String
+  amount    Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+
+  payment   TaskPayment @relation(fields: [paymentId], references: [id])
+
+  @@map("transfers")
+}
+
 
 
 model Review {
