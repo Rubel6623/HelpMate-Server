@@ -15,4 +15,16 @@ router.get(
   ReviewsController.getReviewsForUser
 );
 
+router.get(
+  '/',
+  auth(UserRole.ADMIN, UserRole.SUPERADMIN),
+  ReviewsController.getAllReviews
+);
+
+router.delete(
+  '/:id',
+  auth(UserRole.ADMIN, UserRole.SUPERADMIN),
+  ReviewsController.deleteReview
+);
+
 export const ReviewsRoutes = router;

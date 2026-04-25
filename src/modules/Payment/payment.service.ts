@@ -30,7 +30,7 @@ const createPaymentIntent = async (payload: { amount?: number; taskId?: string }
       throw new AppError(404, 'Task not found');
     }
     
-    finalAmount = Number(task.offerPrice);
+    finalAmount = payload.amount || Number(task.offerPrice);
     metadata.taskId = task.id;
     metadata.type = 'task_payment';
   }

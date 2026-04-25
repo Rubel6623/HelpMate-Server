@@ -56,8 +56,14 @@ const getAllTasks = async (filters: any) => {
   
   const where: any = {};
   if (categoryId) where.categoryId = categoryId;
-  // Default to OPEN tasks only - public feed should not show assigned/completed/cancelled tasks
-  where.status = status || TaskStatus.PENDING;
+  
+  if (status === "NOT_COMPLETED") {
+    where.status = { 
+      notIn: [TaskStatus.COMPLETED, TaskStatus.RELEASED, TaskStatus.CANCELLED] 
+    };
+  } else {
+    where.status = status || TaskStatus.PENDING;
+  }
   if (minPrice || maxPrice) {
     where.offerPrice = {};
     if (minPrice) where.offerPrice.gte = minPrice;
@@ -107,12 +113,24 @@ const getSingleTask = async (id: string) => {
               runnerProfile: true
             }
           }
-        }
+        },
+        orderBy: { createdAt: 'desc' }
       },
       assignment: {
         include: {
-          runner: true
+          runner: {
+            select: {
+              id: true,
+              name: true,
+              phone: true,
+              avatarUrl: true
+            }
+          }
         }
+      },
+      payment: true,
+      statusLogs: {
+        orderBy: { createdAt: 'asc' }
       }
     }
   });

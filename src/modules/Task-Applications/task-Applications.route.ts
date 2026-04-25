@@ -24,8 +24,9 @@ router.get(
 
 router.patch(
   '/:id/status',
-  auth(UserRole.USER, UserRole.ADMIN, UserRole.SUPERADMIN),
+  auth(UserRole.USER, UserRole.RUNNER, UserRole.ADMIN, UserRole.SUPERADMIN),
   TaskApplicationsController.updateApplicationStatus
 );
 
 export const TaskApplicationsRoutes = router;
+

@@ -31,8 +31,8 @@ const updateUserStatus = async (id: string, data: { isActive?: boolean, verifica
   const result = await prisma.user.update({
     where: { id },
     data: {
-      isActive: data.isActive,
-      verificationStatus: data.verificationStatus as any
+      ...(data.isActive !== undefined && { isActive: data.isActive }),
+      ...(data.verificationStatus && { verificationStatus: data.verificationStatus as any })
     }
   });
   return result;

@@ -25,7 +25,18 @@ const getTransactionById = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getAllTransactions = catchAsync(async (req: Request, res: Response) => {
+  const result = await TransactionsService.getAllTransactions();
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'All transactions retrieved successfully',
+    data: result,
+  });
+});
+
 export const TransactionsController = {
   getMyTransactions,
   getTransactionById,
+  getAllTransactions,
 };

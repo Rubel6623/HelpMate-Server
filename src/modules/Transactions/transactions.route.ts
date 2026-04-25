@@ -11,6 +11,12 @@ router.get(
 );
 
 router.get(
+  '/',
+  auth(UserRole.ADMIN, UserRole.SUPERADMIN),
+  TransactionsController.getAllTransactions
+);
+
+router.get(
   '/:id',
   auth(UserRole.USER, UserRole.RUNNER, UserRole.ADMIN, UserRole.SUPERADMIN),
   TransactionsController.getTransactionById

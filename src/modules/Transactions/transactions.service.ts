@@ -27,7 +27,24 @@ const getTransactionById = async (id: string) => {
   return result;
 };
 
+const getAllTransactions = async () => {
+  const result = await prisma.transaction.findMany({
+    include: {
+      wallet: {
+        include: {
+          user: true
+        }
+      }
+    },
+    orderBy: {
+      createdAt: 'desc'
+    }
+  });
+  return result;
+};
+
 export const TransactionsService = {
   getMyTransactions,
-  getTransactionById
+  getTransactionById,
+  getAllTransactions
 };

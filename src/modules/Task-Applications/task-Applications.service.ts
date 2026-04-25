@@ -13,7 +13,7 @@ const applyForTask = async (runnerId: string, payload: { taskId: string; bidAmou
   });
 
   if (existingApp) {
-    throw new Error('You have already applied for this task');
+    throw new Error('You have already accepted or applied for this task');
   }
 
   const task = await prisma.task.findUniqueOrThrow({ where: { id: payload.taskId } });
@@ -26,10 +26,11 @@ const applyForTask = async (runnerId: string, payload: { taskId: string; bidAmou
   });
 
   if (!runnerProfile || !runnerProfile.nationalId || !runnerProfile.studentId) {
-    throw new Error('You must provide both NID and Student ID in your profile before bidding on tasks');
+    throw new Error('You must provide both NID and Student ID in your profile before accepting tasks');
   }
 
   const result = await prisma.$transaction(async (tx) => {
+    // 1. Create the application as ACCEPTED immediately (Direct Accept model)
     const application = await tx.taskApplication.create({
       data: {
         ...payload,
@@ -38,32 +39,41 @@ const applyForTask = async (runnerId: string, payload: { taskId: string; bidAmou
       }
     });
 
-    await tx.task.update({
-      where: { id: payload.taskId },
-      data: { status: TaskStatus.ACCEPTED } // Rule 7.1
+    // 2. Reject any other pending applications (unlikely in direct accept but good for safety)
+    await tx.taskApplication.updateMany({
+      where: {
+        taskId: payload.taskId,
+        id: { not: application.id }
+      },
+      data: { status: ApplicationStatus.REJECTED }
     });
 
+    // 3. Update task status to ACCEPTED
+    await tx.task.update({
+      where: { id: payload.taskId },
+      data: { status: TaskStatus.ACCEPTED }
+    });
+
+    // 4. Create the Assignment
     await tx.assignment.create({
       data: {
         taskId: payload.taskId,
-        runnerId,
+        runnerId: runnerId,
         applicationId: application.id
       }
     });
 
+    // 5. Log the status change
     await tx.taskStatusLog.create({
       data: {
         taskId: payload.taskId,
         status: TaskStatus.ACCEPTED,
-        note: 'Task accepted and assigned to runner'
+        note: 'Task accepted by runner (Direct Accept)'
       }
     });
 
     return application;
   });
-
-  // Capture payment when accepted (Rule 6.2 & 7.1)
-  await PaymentService.capturePayment(payload.taskId);
 
   return result;
 };

@@ -25,7 +25,30 @@ const getReviewsForUser = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getAllReviews = catchAsync(async (req: Request, res: Response) => {
+  const result = await ReviewsService.getAllReviews();
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'All reviews retrieved successfully',
+    data: result,
+  });
+});
+
+const deleteReview = catchAsync(async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  const result = await ReviewsService.deleteReview(id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Review deleted successfully',
+    data: result,
+  });
+});
+
 export const ReviewsController = {
   createReview,
   getReviewsForUser,
+  getAllReviews,
+  deleteReview
 };

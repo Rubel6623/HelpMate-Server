@@ -162,8 +162,16 @@ const approveAssignment = async (id: string, otp?: string, userId?: string) => {
   });
 
   // Release payment (Rule 6.3 & 7.3)
+  // If runner has no Stripe account yet, task is still COMPLETED but payout is deferred
   if (assignment.runner.runnerProfile?.stripeAccountId) {
-    await PaymentService.releasePayment(assignment.taskId, assignment.runner.runnerProfile.stripeAccountId);
+    try {
+      await PaymentService.releasePayment(assignment.taskId, assignment.runner.runnerProfile.stripeAccountId);
+    } catch (paymentError) {
+      console.error('Payment release failed after task approval:', paymentError);
+      // Don't re-throw — task is already COMPLETED, admin can manually release
+    }
+  } else {
+    console.warn(`Runner ${assignment.runnerId} has no Stripe account. Task ${assignment.taskId} confirmed but payment not released.`);
   }
 
   return result;

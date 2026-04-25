@@ -70,14 +70,25 @@ const getAllRunners = async (query: any) => {
 };
 
 const verifyProfile = async (id: string, isVerified: boolean) => {
-  const result = await prisma.runnerProfile.update({
-    where: { id },
-    data: { 
-      isVerified,
-      verifiedAt: isVerified ? new Date() : null
-    }
-  });
-  return result;
+  try {
+    // Try to update by RunnerProfile ID
+    return await prisma.runnerProfile.update({
+      where: { id },
+      data: { 
+        isVerified,
+        verifiedAt: isVerified ? new Date() : null
+      }
+    });
+  } catch (error) {
+    // Fallback: Try to update by User ID if the provided ID was a userId
+    return await prisma.runnerProfile.update({
+      where: { userId: id },
+      data: { 
+        isVerified,
+        verifiedAt: isVerified ? new Date() : null
+      }
+    });
+  }
 };
 
 export const RunnerProfilesService = {
