@@ -8,7 +8,9 @@ const stripe = new Stripe(config.stripe_secret_key as string);
 
 const createPaymentIntent = async (payload: { amount?: number; taskId?: string }, userId: string) => {
   let finalAmount = payload.amount || 0;
-  let metadata: any = { userId };
+  let metadata: any = { userId, type: 'wallet_topup' };
+
+  let captureMethod: 'manual' | 'automatic' = 'automatic';
 
   if (payload.taskId) {
     const task = await prisma.task.findUnique({
@@ -33,6 +35,7 @@ const createPaymentIntent = async (payload: { amount?: number; taskId?: string }
     finalAmount = payload.amount || Number(task.offerPrice);
     metadata.taskId = task.id;
     metadata.type = 'task_payment';
+    captureMethod = 'manual';
   }
 
   if (finalAmount <= 0) {
@@ -45,7 +48,7 @@ const createPaymentIntent = async (payload: { amount?: number; taskId?: string }
   const paymentIntent = await stripe.paymentIntents.create({
     amount: amountInCents,
     currency: 'usd',
-    capture_method: 'manual', // Rule 6.1: AUTHORIZED phase
+    capture_method: captureMethod,
     metadata,
   }, {
     idempotencyKey

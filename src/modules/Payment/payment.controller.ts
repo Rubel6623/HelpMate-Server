@@ -5,6 +5,8 @@ import { PaymentService } from './payment.service';
 import { WalletsService } from '../Wallets/wallets.service';
 import { stripe } from '../../lib/stripe';
 import config from '../../config';
+import { prisma } from '../../lib/prisma';
+import { PaymentStatus } from '../../../generated/prisma';
 
 const createPaymentIntent = catchAsync(async (req: Request, res: Response) => {
   const user = req.user as any;
@@ -56,19 +58,48 @@ const stripeWebhook = catchAsync(async (req: Request, res: Response) => {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
+  const paymentIntent = event.data.object as any;
+  const { taskId, userId, type } = paymentIntent.metadata;
+
   // Rule 8: Webhook implementation
   if (event.type === 'payment_intent.payment_failed') {
-    console.log('Payment failed');
+    console.log(`Payment failed for: ${taskId || userId}`);
+    if (type === 'task_payment' && taskId) {
+      await prisma.taskPayment.update({
+        where: { taskId },
+        data: { status: PaymentStatus.FAILED }
+      });
+    }
+  }
+
+  // Handle manual capture authorization (ESCROW READY)
+  if (event.type === 'payment_intent.amount_capturable_updated') {
+    if (type === 'task_payment' && taskId) {
+      await prisma.taskPayment.update({
+        where: { taskId },
+        data: { status: PaymentStatus.AUTHORIZED }
+      });
+      console.log(`Payment authorized (ESCROW READY) for task: ${taskId}`);
+    }
   }
 
   // Handle successful payment (if immediate capture used or after manual capture)
   if (event.type === 'payment_intent.succeeded') {
-    const paymentIntent = event.data.object as any;
-    const { taskId, userId, type } = paymentIntent.metadata;
-
     if (type === 'wallet_topup' && userId) {
       const amount = paymentIntent.amount / 100;
       await WalletsService.topUp(userId, amount, paymentIntent.id);
+      console.log(`Wallet topped up for user: ${userId}`);
+    } 
+    else if (type === 'task_payment' && taskId) {
+      // FINAL success after capture (ESCROW phase)
+      await prisma.taskPayment.update({
+        where: { taskId },
+        data: { 
+          status: PaymentStatus.ESCROW,
+          escrowedAt: new Date()
+        }
+      });
+      console.log(`Payment captured (ESCROW) for task: ${taskId}`);
     }
   }
 

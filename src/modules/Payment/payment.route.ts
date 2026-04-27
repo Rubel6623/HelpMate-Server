@@ -34,5 +34,11 @@ router.post(
   PaymentController.createOnboardingLink
 );
 
+router.post(
+  '/webhook',
+  express.raw({ type: 'application/json' }),
+  PaymentController.stripeWebhook
+);
+
 export const PaymentRoutes = router;
 
