@@ -106,6 +106,55 @@ enum BadgeType {
 }
 
 
+
+enum BlogStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum CategoryTag {
+  EARNING
+  PRODUCTIVITY
+  SAFETY
+  LIFESTYLE
+}
+
+model Blog {
+  id           String      @id @default(uuid())
+  title        String
+  slug         String      @unique
+  content      String      @db.Text // Ensures long-form text support in SQL
+  excerpt      String      @db.VarChar(255) 
+  
+  // Use the Enum for type safety
+  category     CategoryTag
+  tags         String[]    // Keeping this as String[] for flexible sub-topics
+  
+  coverImage   String?
+  readTimeMin  Int         @default(5)
+  
+  // SEO Metadata
+  metaTitle    String?
+  metaDesc     String?
+
+  // State Management
+  status       BlogStatus  @default(DRAFT)
+  viewCount    Int         @default(0)
+  
+  // Timestamps
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  publishedAt  DateTime?
+
+  // Relations
+  authorId     String
+  author       User        @relation(fields: [authorId], references: [id])
+
+  @@index([slug]) // Speed up lookups by slug
+  @@map("blogs")
+}
+
 model User {
   id                 String             @id @default(uuid())
   name               String
@@ -135,6 +184,7 @@ model User {
   disputes         Dispute[]          @relation("DisputeRaisedBy")
   badges           UserBadge[]
   sosAlerts        SosAlert[]
+  blogs            Blog[]
 
   @@map("users")
 }

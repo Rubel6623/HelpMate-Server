@@ -18,6 +18,8 @@ import { TaskStopsRoutes } from '../modules/Task-Stops/task-Stops.route';
 import { TaskStatusLogsRoutes } from '../modules/Task-Status-Logs/task-Status-Logs.route';
 import { TaskPaymentsRoutes } from '../modules/Task-Payments/task-Payments.route';
 import { PaymentRoutes } from '../modules/Payment/payment.route';
+import { BlogRoutes } from '../modules/blogs/blogs.route';
+
 
 const router = Router();
 
@@ -98,6 +100,11 @@ const moduleRoutes: { path: string; route: any }[] = [
     path: '/payment',
     route: PaymentRoutes,
   },
+  {
+    path: '/blogs',
+    route: BlogRoutes,
+  },
+
 ];
 
 moduleRoutes.forEach((route) => router.use(route.path, route.route));
