@@ -25,6 +25,7 @@ const getProfile = async (userId: string) => {
     include: {
       user: {
         select: {
+          id: true,
           name: true,
           email: true,
           phone: true,
@@ -37,11 +38,15 @@ const getProfile = async (userId: string) => {
 };
 
 const getAllRunners = async (query: any) => {
-  const { isVerified } = query;
+  const { isVerified, userId } = query;
   
   const where: any = {
     role: 'RUNNER'
   };
+
+  if (userId) {
+    where.id = userId;
+  }
 
   // If isVerified is provided, we filter based on the runnerProfile's isVerified status
   // Note: if isVerified=false, it will also include those who don't have a profile yet

@@ -3,6 +3,18 @@ import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { NotificationsService } from './notifications.service';
 
+enum NotificationType {
+  ORDER_REQUEST = 'ORDER_REQUEST',
+  ORDER_CONFIRMATION = 'ORDER_CONFIRMATION',
+  ORDER_DELIVERED = 'ORDER_DELIVERED',
+  ORDER_CANCELLED = 'ORDER_CANCELLED',
+  PAYMENT_RECEIVED = 'PAYMENT_RECEIVED',
+  PAYMENT_FAILED = 'PAYMENT_FAILED',
+  REMINDER = 'REMINDER',
+  DIRECT_MESSAGE = 'DIRECT_MESSAGE',
+  OTHER = 'OTHER',
+}
+
 const createNotification = catchAsync(async (req: Request, res: Response) => {
   const result = await NotificationsService.createNotification(req.body);
   sendResponse(res, {
@@ -39,11 +51,11 @@ const markAsRead = catchAsync(async (req: Request, res: Response) => {
 const sendMessageToRunner = catchAsync(async (req: Request, res: Response) => {
   const { runnerId, title, message } = req.body;
   const senderId = (req as any).user.id;
-  const senderName = (req as any).user.name;
+  const senderName = (req as any).user.name || 'A user';
 
   const result = await NotificationsService.createNotification({
     userId: runnerId,
-    type: 'DIRECT_MESSAGE' as any,
+    type: NotificationType.DIRECT_MESSAGE as any,
     title: title || `Message from ${senderName}`,
     message: message,
     data: { senderId, senderName }
