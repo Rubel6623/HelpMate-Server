@@ -12,6 +12,11 @@ const getAllCategories = async () => {
     where: {
       isActive: true,
     },
+    include: {
+      _count: {
+        select: { tasks: true },
+      },
+    },
   });
   return result;
 };

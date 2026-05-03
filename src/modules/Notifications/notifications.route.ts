@@ -22,6 +22,12 @@ router.patch(
   NotificationsController.markAsRead
 );
 
+router.patch(
+  '/mark-all-read',
+  auth(UserRole.USER, UserRole.RUNNER, UserRole.ADMIN, UserRole.SUPERADMIN),
+  NotificationsController.markAllAsRead
+);
+
 router.post(
   '/send-message',
   auth(UserRole.USER, UserRole.RUNNER, UserRole.ADMIN, UserRole.SUPERADMIN),

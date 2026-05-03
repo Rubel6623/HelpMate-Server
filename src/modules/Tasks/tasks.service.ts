@@ -81,7 +81,12 @@ const getAllTasks = async (filters: any) => {
           avatarUrl: true
         }
       },
-      stops: true
+      stops: true,
+      _count: {
+        select: {
+          applications: true
+        }
+      }
     },
     orderBy: {
       createdAt: 'desc'
