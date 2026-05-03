@@ -45,6 +45,27 @@ const loginUser = async (req: Request, res: Response) => {
   }
 };
 
+const socialLogin = async (req: Request, res: Response) => {
+  try {
+    const result = await AuthService.socialLoginIntoDB(req.body);
+    res.cookie("token", result.token, {
+      httpOnly: true,
+      secure: config.node_env === "production",
+      sameSite: "strict",
+    })
+    res.status(200).json({
+      success: true,
+      message: "Social login successful",
+      data: result
+    });
+  } catch (e: any) {
+    res.status(500).json({
+      success: false,
+      message: e.message || "Social login failed",
+    });
+  }
+};
+
 
 const getMe = async (req: Request, res: Response) => {
   try {
@@ -109,6 +130,7 @@ const logoutUser = async (req: Request, res: Response) => {
 export const AuthController = {
   createUser,
   loginUser,
+  socialLogin,
   getMe,
   updateMe,
   logoutUser

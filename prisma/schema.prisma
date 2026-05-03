@@ -87,6 +87,7 @@ enum NotificationType {
   REVIEW_RECEIVED
   SOS_ALERT
   SYSTEM
+  DIRECT_MESSAGE
 }
 
 enum DisputeStatus {

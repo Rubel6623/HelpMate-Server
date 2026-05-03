@@ -36,8 +36,30 @@ const markAsRead = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const sendMessageToRunner = catchAsync(async (req: Request, res: Response) => {
+  const { runnerId, title, message } = req.body;
+  const senderId = (req as any).user.id;
+  const senderName = (req as any).user.name;
+
+  const result = await NotificationsService.createNotification({
+    userId: runnerId,
+    type: 'DIRECT_MESSAGE' as any,
+    title: title || `Message from ${senderName}`,
+    message: message,
+    data: { senderId, senderName }
+  });
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Message sent successfully',
+    data: result,
+  });
+});
+
 export const NotificationsController = {
   createNotification,
   getMyNotifications,
   markAsRead,
+  sendMessageToRunner,
 };

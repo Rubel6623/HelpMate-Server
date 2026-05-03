@@ -162,9 +162,56 @@ const updateMeInDB = async (userId: string, payload: Partial<IRegisterPayload>) 
   return result;
 };
 
+const socialLoginIntoDB = async (payload: { email: string, name: string, profilePhoto?: string }) => {
+  let user = await prisma.user.findUnique({
+    where: { email: payload.email },
+  });
+
+  if (!user) {
+    // Generate a unique temporary phone number as it's required in schema
+    const tempPhone = `SOCIAL_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    user = await prisma.user.create({
+      data: {
+        name: payload.name,
+        email: payload.email,
+        phone: tempPhone,
+        passwordHash: await bcrypt.hash(Math.random().toString(36), 8),
+        avatarUrl: payload.profilePhoto,
+        role: UserRole.USER,
+      },
+    });
+
+    await prisma.wallet.create({
+      data: {
+        userId: user.id,
+        balance: 0
+      }
+    });
+  }
+
+  const userData = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    role: user.role,
+    verificationStatus: user.verificationStatus
+  }
+
+  const token = jwt.sign(userData, config.jwt_secret as string, {
+    expiresIn: (config.jwt_expires_in as any) || '2d',
+  });
+
+  return {
+    token,
+    user: userData
+  };
+};
+
 export const AuthService = {
   createUserIntoDB,
   loginUserIntoDB,
   getMeFromDB,
-  updateMeInDB
+  updateMeInDB,
+  socialLoginIntoDB
 };

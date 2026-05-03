@@ -22,4 +22,10 @@ router.patch(
   NotificationsController.markAsRead
 );
 
+router.post(
+  '/send-message',
+  auth(UserRole.USER, UserRole.RUNNER, UserRole.ADMIN, UserRole.SUPERADMIN),
+  NotificationsController.sendMessageToRunner
+);
+
 export const NotificationsRoutes = router;
