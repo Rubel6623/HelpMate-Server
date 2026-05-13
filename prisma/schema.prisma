@@ -206,6 +206,7 @@ model RunnerProfile {
   bio                String?
   isOnline           Boolean @default(false) 
   preferredRadius    Float   @default(5.0)   
+  hourlyRate         Float    @default(10.0)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
@@ -520,4 +521,10 @@ model UserBadge {
 
   @@unique([userId, badgeId])
   @@map("user_badges")
+}
+
+model playing_with_neon {
+  id    Int    @id @default(autoincrement())
+  name  String
+  value Float? @db.Real
 }

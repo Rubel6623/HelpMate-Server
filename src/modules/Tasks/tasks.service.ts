@@ -136,6 +136,18 @@ const getSingleTask = async (id: string) => {
       payment: true,
       statusLogs: {
         orderBy: { createdAt: 'asc' }
+      },
+      reviews: {
+        include: {
+          reviewer: {
+            select: {
+              id: true,
+              name: true,
+              avatarUrl: true
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' }
       }
     }
   });
